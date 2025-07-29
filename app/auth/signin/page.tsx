@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword, Auth } from 'firebase/auth';
 import { GamepadIcon, Mail, Lock, AlertCircle } from 'lucide-react';
 
 export default function SignIn() {
@@ -23,6 +22,14 @@ export default function SignIn() {
     setError('');
 
     try {
+      // Dynamic import with proper typing
+      const firebaseModule = await import('@/lib/firebase');
+      const auth: Auth | null = firebaseModule.auth;
+      
+      if (!auth) {
+        throw new Error('Firebase auth not initialized');
+      }
+
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       router.push('/');
     } catch (error: any) {
@@ -37,6 +44,9 @@ export default function SignIn() {
           break;
         case 'auth/user-disabled':
           setError('This account has been disabled');
+          break;
+        case 'auth/invalid-credential':
+          setError('Invalid email or password');
           break;
         default:
           setError('Failed to sign in. Please try again');

@@ -1,15 +1,24 @@
 import { ref, push, set, get, update, remove } from 'firebase/database';
-import { database } from './firebase';
 import { Game } from '@/types';
+
+// Helper function to get database instance
+async function getDatabase() {
+  const { database } = await import('@/lib/firebase');
+  if (!database) {
+    throw new Error('Firebase database not initialized');
+  }
+  return database;
+}
 
 export async function addGame(gameData: Omit<Game, 'id' | 'createdAt' | 'updatedAt' | 'playCount' | 'rating' | 'ratingCount'>) {
   try {
+    const database = await getDatabase();
     const gamesRef = ref(database, 'games');
     const newGameRef = push(gamesRef);
     
     const game: Omit<Game, 'id'> = {
       ...gameData,
-      tags: gameData.tags || [], // Ensure tags is always an array
+      tags: gameData.tags || [],
       createdAt: new Date(),
       updatedAt: new Date(),
       playCount: 0,
@@ -27,6 +36,7 @@ export async function addGame(gameData: Omit<Game, 'id' | 'createdAt' | 'updated
 
 export async function getAllGames(): Promise<Game[]> {
   try {
+    const database = await getDatabase();
     const gamesRef = ref(database, 'games');
     const snapshot = await get(gamesRef);
     
@@ -35,7 +45,7 @@ export async function getAllGames(): Promise<Game[]> {
       return Object.entries(gamesData).map(([id, gameData]: [string, any]) => ({
         id,
         ...gameData,
-        tags: gameData.tags || [], // Ensure tags is always an array
+        tags: gameData.tags || [],
         playCount: gameData.playCount || 0,
         rating: gameData.rating || 0,
         ratingCount: gameData.ratingCount || 0,
@@ -47,7 +57,7 @@ export async function getAllGames(): Promise<Game[]> {
     return [];
   } catch (error) {
     console.error('Error fetching games:', error);
-    throw error;
+    return [];
   }
 }
 
@@ -57,12 +67,13 @@ export async function getFeaturedGames(): Promise<Game[]> {
     return games.filter(game => game.featured);
   } catch (error) {
     console.error('Error fetching featured games:', error);
-    throw error;
+    return [];
   }
 }
 
 export async function getGameById(id: string): Promise<Game | null> {
   try {
+    const database = await getDatabase();
     const gameRef = ref(database, `games/${id}`);
     const snapshot = await get(gameRef);
     
@@ -71,7 +82,7 @@ export async function getGameById(id: string): Promise<Game | null> {
       return {
         id,
         ...gameData,
-        tags: gameData.tags || [], // Ensure tags is always an array
+        tags: gameData.tags || [],
         playCount: gameData.playCount || 0,
         rating: gameData.rating || 0,
         ratingCount: gameData.ratingCount || 0,
@@ -83,16 +94,17 @@ export async function getGameById(id: string): Promise<Game | null> {
     return null;
   } catch (error) {
     console.error('Error fetching game:', error);
-    throw error;
+    return null;
   }
 }
 
 export async function updateGame(id: string, gameData: Partial<Omit<Game, 'id' | 'createdAt'>>) {
   try {
+    const database = await getDatabase();
     const gameRef = ref(database, `games/${id}`);
     const updateData = {
       ...gameData,
-      tags: gameData.tags || [], // Ensure tags is always an array
+      tags: gameData.tags || [],
       updatedAt: new Date(),
     };
     
@@ -105,6 +117,7 @@ export async function updateGame(id: string, gameData: Partial<Omit<Game, 'id' |
 
 export async function deleteGame(id: string) {
   try {
+    const database = await getDatabase();
     const gameRef = ref(database, `games/${id}`);
     await remove(gameRef);
   } catch (error) {
@@ -115,6 +128,7 @@ export async function deleteGame(id: string) {
 
 export async function incrementPlayCount(id: string) {
   try {
+    const database = await getDatabase();
     const gameRef = ref(database, `games/${id}`);
     const snapshot = await get(gameRef);
     
@@ -135,6 +149,7 @@ export async function incrementPlayCount(id: string) {
 
 export async function rateGame(id: string, rating: number) {
   try {
+    const database = await getDatabase();
     const gameRef = ref(database, `games/${id}`);
     const snapshot = await get(gameRef);
     

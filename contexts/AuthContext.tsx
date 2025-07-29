@@ -1,3 +1,4 @@
+// contexts/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
@@ -23,6 +24,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -39,6 +45,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = user ? getAdminEmails().includes(user.email || '') : false;
 
   const signOut = async () => {
+    if (!auth) return;
+    
     try {
       await firebaseSignOut(auth);
     } catch (error) {

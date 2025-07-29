@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { createUserWithEmailAndPassword, Auth } from 'firebase/auth';
 import { GamepadIcon, Mail, Lock, User, AlertCircle } from 'lucide-react';
 
 export default function SignUp() {
@@ -41,6 +40,14 @@ export default function SignUp() {
     setError('');
 
     try {
+      // Dynamic import with proper typing
+      const firebaseModule = await import('@/lib/firebase');
+      const auth: Auth | null = firebaseModule.auth;
+      
+      if (!auth) {
+        throw new Error('Firebase auth not initialized');
+      }
+
       await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       router.push('/');
     } catch (error: any) {
