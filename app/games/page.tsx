@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import GameCard from '@/components/GameCard';
@@ -8,7 +8,7 @@ import { Game } from '@/types';
 import { getAllGames } from '@/lib/gameUtils';
 import { Search, Filter, Grid, List } from 'lucide-react';
 
-export default function GamesPage() {
+function GamesPageContent() {
   const searchParams = useSearchParams();
   const [games, setGames] = useState<Game[]>([]);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
@@ -245,5 +245,13 @@ export default function GamesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function GamesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50"><Header /><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><p className='text-gray-600'>Loading games...</p></div></div>}>
+      <GamesPageContent />
+    </Suspense>
   );
 }
