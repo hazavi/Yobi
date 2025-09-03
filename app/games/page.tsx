@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import GameCard from '@/components/GameCard';
 import { Game } from '@/types';
@@ -8,6 +9,7 @@ import { getAllGames } from '@/lib/gameUtils';
 import { Search, Filter, Grid, List } from 'lucide-react';
 
 export default function GamesPage() {
+  const searchParams = useSearchParams();
   const [games, setGames] = useState<Game[]>([]);
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,13 @@ export default function GamesPage() {
 
   useEffect(() => {
     loadGames();
-  }, []);
+    
+    // Check for search query from URL
+    const urlSearch = searchParams.get('search');
+    if (urlSearch) {
+      setSearchQuery(urlSearch);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     filterAndSortGames();
@@ -93,9 +101,7 @@ export default function GamesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">All Games</h1>
-          <p className="text-gray-600">
-            Discover and play hazavi's games with Yobi!
-          </p>
+
         </div>
 
         {/* Filters */}

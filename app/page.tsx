@@ -224,15 +224,7 @@ export default function Home() {
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Yobi</span>
             </div>
-            <p className="text-gray-400 mb-6 animate-fade-in" style={{animationDelay: '200ms'}}>
-              The ultimate destination for online gaming
-            </p>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400 animate-fade-in" style={{animationDelay: '400ms'}}>
-              <a href="/games" className="hover:text-white transition-colors">All Games</a>
-              <a href="/about" className="hover:text-white transition-colors">About</a>
-              <a href="/contact" className="hover:text-white transition-colors">Contact</a>
-              <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-            </div>
+
             <div className="border-t border-gray-800 mt-8 pt-6 text-gray-500 text-sm animate-fade-in" style={{animationDelay: '600ms'}}>
               &copy; 2025 Yobi. All rights reserved.
             </div>

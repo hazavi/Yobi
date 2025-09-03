@@ -68,11 +68,7 @@ export default function GameCard({ game }: GameCardProps) {
 
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col space-y-2">
-          {featured && (
-            <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-              ⭐ Featured
-            </span>
-          )}
+        
           <span className="bg-black/20 backdrop-blur-sm text-white text-xs font-medium px-3 py-1 rounded-full border border-white/20">
             {category}
           </span>

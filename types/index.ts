@@ -1,4 +1,9 @@
 // filepath: types/index.ts
+export interface KeyboardControl {
+  key: string;
+  action: string;
+}
+
 export interface Game {
   id: string;
   title: string;
@@ -13,6 +18,7 @@ export interface Game {
   playCount: number;
   rating: number;
   ratingCount: number;
+  keyboardControls?: KeyboardControl[];
 }
 
 export type GameCategory = 

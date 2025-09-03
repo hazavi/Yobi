@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { Game } from '@/types';
+import { Game, KeyboardControl } from '@/types';
 import { addGame, getAllGames, updateGame, deleteGame } from '@/lib/gameUtils';
-import { Plus, Edit, Trash2, Save, X, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, ExternalLink, Keyboard } from 'lucide-react';
 
 export default function AdminPanel() {
   const { user, isAdmin, loading } = useAuth();
@@ -23,7 +23,16 @@ export default function AdminPanel() {
     tags: '',
     featured: false,
   });
+  const [keyboardControls, setKeyboardControls] = useState<KeyboardControl[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const availableKeys = [
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    'w', 'a', 's', 'd', 'q', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+    'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm',
+    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+    'Space', 'Enter', 'Shift', 'Ctrl', 'Alt', 'Tab', 'Escape'
+  ];
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -53,6 +62,7 @@ export default function AdminPanel() {
       const gameData = {
         ...formData,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        keyboardControls: keyboardControls.length > 0 ? keyboardControls : undefined,
       };
 
       if (editingGame) {
@@ -82,6 +92,7 @@ export default function AdminPanel() {
       tags: game.tags.join(', '),
       featured: game.featured,
     });
+    setKeyboardControls(game.keyboardControls || []);
     setShowAddForm(true);
   };
 
@@ -107,8 +118,23 @@ export default function AdminPanel() {
       tags: '',
       featured: false,
     });
+    setKeyboardControls([]);
     setShowAddForm(false);
     setEditingGame(null);
+  };
+
+  const addKeyboardControl = () => {
+    setKeyboardControls([...keyboardControls, { key: '', action: '' }]);
+  };
+
+  const removeKeyboardControl = (index: number) => {
+    setKeyboardControls(keyboardControls.filter((_, i) => i !== index));
+  };
+
+  const updateKeyboardControl = (index: number, field: 'key' | 'action', value: string) => {
+    const updated = [...keyboardControls];
+    updated[index][field] = value;
+    setKeyboardControls(updated);
   };
 
   if (loading) {
@@ -266,6 +292,90 @@ export default function AdminPanel() {
                 </label>
               </div>
 
+              {/* Keyboard Controls Section */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Keyboard Controls (Optional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addKeyboardControl}
+                    className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Add Control</span>
+                  </button>
+                </div>
+                
+                {keyboardControls.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No keyboard controls added yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {keyboardControls.map((control, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="flex-1">
+                          <select
+                            value={control.key}
+                            onChange={(e) => updateKeyboardControl(index, 'key', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                          >
+                            <option value="">Select Key</option>
+                            <optgroup label="Arrow Keys">
+                              <option value="ArrowUp">↑ Up Arrow</option>
+                              <option value="ArrowDown">↓ Down Arrow</option>
+                              <option value="ArrowLeft">← Left Arrow</option>
+                              <option value="ArrowRight">→ Right Arrow</option>
+                            </optgroup>
+                            <optgroup label="WASD">
+                              <option value="w">W</option>
+                              <option value="a">A</option>
+                              <option value="s">S</option>
+                              <option value="d">D</option>
+                            </optgroup>
+                            <optgroup label="Letters">
+                              {['q', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'].map(letter => (
+                                <option key={letter} value={letter}>{letter.toUpperCase()}</option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="Numbers">
+                              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map(num => (
+                                <option key={num} value={num}>{num}</option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="Special Keys">
+                              <option value="Space">Spacebar</option>
+                              <option value="Enter">Enter</option>
+                              <option value="Shift">Shift</option>
+                              <option value="Ctrl">Ctrl</option>
+                              <option value="Alt">Alt</option>
+                              <option value="Tab">Tab</option>
+                              <option value="Escape">Escape</option>
+                            </optgroup>
+                          </select>
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            placeholder="Action (e.g., Move up, Jump)"
+                            value={control.action}
+                            onChange={(e) => updateKeyboardControl(index, 'action', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeKeyboardControl(index)}
+                          className="text-red-600 hover:text-red-700 p-1"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end space-x-4">
                 <button
                   type="button"
@@ -314,6 +424,9 @@ export default function AdminPanel() {
                       Plays
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Controls
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Featured
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -351,6 +464,18 @@ export default function AdminPanel() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {game.playCount.toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {game.keyboardControls && game.keyboardControls.length > 0 ? (
+                          <div className="flex items-center space-x-1">
+                            <Keyboard className="h-4 w-4 text-blue-600" />
+                            <span className="text-xs text-blue-600">
+                              {game.keyboardControls.length} controls
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">No controls</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {game.featured ? (
